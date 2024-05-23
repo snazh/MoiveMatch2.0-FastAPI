@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block head %}
+<style>
+
+    * {
+  margin: 0;
+  padding: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="loading" id="loading">
+    <div class="one"></div>
+</section>
+
+<div id="content" style="display:none;">
+    <br>
+    <div id="soulmate-info">
+        <h2>Soulmate Found!</h2>
+        <br>
+        <h3><strong>Username:</strong><a href="another-profile/{{soulmate[0]}}">{{ soulmate[1] }}</a></h3>
+        <h3>
+            <strong>Match Percentage:</strong> <strong
+                class="{% if percentage < 30 %} red {% elif percentage < 70 %} yellow {% else %} green {% endif %}">{{
+            percentage }}%</strong>
+        </h3>
+    </div>
+    {%if not movies%}
+    <div class="no-results">
+        <h2>No Movies Found</h2>
+        <p>Try to add more movie</p>
+    </div>
+    {%else%}
+    <div class="film-list">
+        <section class="articles">
+            {% for movie in movies %}
+            <article>
+                <div class="article-wrapper">
+                    <figure>
+                        {% if movie['backdrop_path'] %}
+                        <img alt="movie-img" src="https://image.tmdb.org/t/p/w500{{ movie['backdrop_path'] }}">
+                        {% else %}
+                        <img alt="movie-img" src="{{ url_for('static', path='pages/static/img/card_bg.png') }}">
+                        {% endif %}
+                    </figure>
+                    <div class="article-body">
+                        <h3>{{ movie['title']|truncate(22) }}</h3>
+                        <p>{{ movie['overview']|truncate(50) }}</p>
+                        <a href="/pages/movie-overview/{{ movie['id'] }}" class="read-more">
+                            Read more <span class="sr-only"></span>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+    </div>
+    {%endif%}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const content = document.getElementById('content');
+        const loading = document.getElementById('loading');
+
+        // Simulate a delay for the animation effect (remove this in production)
+        setTimeout(() => {
+            loading.style.display = 'none';
+            content.style.display = 'block';
+        }, 1000); // Change this value to control the duration of the loading animation
+    });
+</script>
+{% endblock %}

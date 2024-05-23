@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='pages/static/css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-container">
+
+        <div class="section">
+            <br><br>
+            <img src="{{ url_for('static', path='pages/static/img/avatar.png') }}" alt="User Avatar" class="avatar">
+            <div class="username">{{user['username']}}</div>
+            <div class="email">{{user['email']}}</div>
+        </div>
+        <div class="section">
+            <p><strong>My movies</strong></p>
+            <ul class="movies-list">
+                {%for movie in user['movies']%}
+                <li><a href = "movie-overview/{{movie['id']}}">{{movie['title']|truncate(25)}}</a></li>
+                {%endfor%}
+            </ul>
+            <a href="/pages/catalog/Grinch" class="add-movie">Search Movie</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

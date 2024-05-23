@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='pages/static/css/style.css') }}">
+</head>
+<body class="login-body">
+    <div class="login-form">
+        <h2>Login</h2>
+        <form id="loginForm" method="POST">
+            <div style="position: relative;">
+                <input type="text" id="email" name="username" placeholder="Email" required>
+                <div class="error" id="emailError"></div>
+            </div>
+            <div style="position: relative;">
+                <input type="password" id="password" name="password" placeholder="Password" required>
+                <div class="error" id="passwordError"></div>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <a href="/pages/register">No account?</a>
+    </div>
+
+    <!-- Include Axios library -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const loginForm = document.getElementById("loginForm");
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            // Clear any previous error messages
+            const emailError = document.getElementById("emailError");
+            const passwordError = document.getElementById("passwordError");
+            emailError.textContent = "";
+            passwordError.textContent = "";
+
+            try {
+                const data = new URLSearchParams();
+                data.append('grant_type', 'password');
+                data.append('username', email);
+                data.append('password', password);
+
+                const response = await axios.post("/auth/jwt/login", data, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+
+                // Assuming response.data.access_token contains the JWT token
+                localStorage.setItem("token", response.data.access_token);
+
+                // Redirect to a protected page or reload the current page
+                window.location.href = "/pages/trends";
+            } catch (error) {
+                // Handle login errors
+                if (error.response) {
+                    // Server responded with an error status code
+                    if (error.response.status === 400) {
+                        // Bad Request, invalid credentials
+                        passwordError.textContent = "Invalid email or password";
+                    } else {
+                        // Other server errors
+                        passwordError.textContent = "Server error. Please try again later.";
+                    }
+                } else {
+                    // Network error or other client-side errors
+                    passwordError.textContent = "Network error. Please check your connection and try again.";
+                }
+            }
+        });
+    </script>
+</body>
+</html>

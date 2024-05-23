@@ -1,0 +1,64 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #121212;
+}
+.profile-container {
+    background-color: #1e1e1e;
+    border-radius: 20px; /* Border radius applied to external container */
+    padding: 80px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Added box shadow for depth */
+    display: flex; /* Added */
+    justify-content: space-between; /* Added */
+    width: 800px; /* Adjusted */
+    text-align: center;
+}
+.section {
+    margin-bottom: 20px;
+    flex: 1; /* Added */
+    height: 300px; /* Increased height */
+    overflow-y: auto; /* Added to enable scrolling */
+}
+.avatar {
+
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-bottom: 35px;
+}
+.username {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #fff; /* Changed text color to white */
+}
+.email {
+    font-size: 1em;
+    color: #ccc; /* Changed text color to light gray */
+    margin-bottom: 20px;
+}
+.movies-list {
+    list-style-type: none;
+    padding: 0;
+}
+.movies-list li {
+    background-color: #444; /* Adjusted list item background color */
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+.add-movie {
+    background-color: #6200ea;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s; /* Added transition for smoother hover effect */
+}
+.add-movie:hover {
+    background-color: #4b0082; /* Darker color on hover */
+}

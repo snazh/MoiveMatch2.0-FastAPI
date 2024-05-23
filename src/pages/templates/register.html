@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='pages/static/css/style.css') }}">
+</head>
+<body class="registration-body">
+<div class="registration-form">
+    <h2>Registration</h2>
+    <form id="registrationForm" method="POST">
+        <div style="position: relative;">
+            <input type="text" id="email" placeholder="Email" required>
+            <div class="error" id="emailError"></div>
+        </div>
+        <div style="position: relative;">
+            <input type="text" id="username" placeholder="Username" required>
+            <div class="error" id="usernameError"></div>
+        </div>
+        <div style="position: relative;">
+            <input type="password" id="password" placeholder="Password" required>
+
+            <div class="error" id="passwordError"></div>
+        </div>
+        <div style="position: relative;">
+            <input type="password" id="repeatPassword" placeholder="Repeat Password" required>
+            <div class="error" id="repeatPasswordError"></div>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+    <a href="/pages/login">Log in?</a>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const registrationForm = document.getElementById('registrationForm');
+        const emailField = document.getElementById('email');
+        const usernameField = document.getElementById('username');
+        const passwordField = document.getElementById('password');
+        const repeatPasswordField = document.getElementById('repeatPassword');
+
+
+        const emailError = document.getElementById('emailError');
+        const usernameError = document.getElementById('usernameError');
+        const passwordError = document.getElementById('passwordError');
+        const repeatPasswordError = document.getElementById('repeatPasswordError');
+
+
+
+        registrationForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent form submission
+
+            let isValid = true;
+
+            // Validate email
+            if (!validateEmail(emailField.value)) {
+                emailError.textContent = 'Please enter a valid email address.';
+                isValid = false;
+            } else {
+                emailError.textContent = '';
+            }
+
+            // Validate username
+            if (usernameField.value.trim() === '') {
+                usernameError.textContent = 'Username is required.';
+                isValid = false;
+            } else if (usernameField.value.trim().length <= 5) {
+                usernameError.textContent = 'Username must be more than 5 characters.';
+                isValid = false;
+            } else {
+                usernameError.textContent = '';
+            }
+
+            // Validate password
+            if (passwordField.value.trim() === '') {
+                passwordError.textContent = 'Password is required.';
+                isValid = false;
+            } else if (passwordField.value.length < 6) {
+                passwordError.textContent = 'Password must be at least 6 characters long.';
+                isValid = false;
+            } else {
+                passwordError.textContent = '';
+            }
+
+            // Validate repeat password
+            if (repeatPasswordField.value.trim() === '') {
+                repeatPasswordError.textContent = 'Please repeat the password.';
+                isValid = false;
+            } else if (repeatPasswordField.value !== passwordField.value) {
+                repeatPasswordError.textContent = 'Passwords do not match.';
+                isValid = false;
+            } else {
+                repeatPasswordError.textContent = '';
+            }
+
+            if (isValid) {
+                // Send data to the FastAPI backend
+                const userData = {
+                    email: emailField.value,
+                    username: usernameField.value,
+                    password: passwordField.value
+                };
+
+                try {
+                    const response = await fetch('/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    });
+
+                    if (!response.ok) {
+                        const responseData = await response.json();
+                        throw new Error(responseData.detail || 'Registration failed.');
+                    }
+
+                    // Handle successful registration (e.g., redirect to login page)
+                    alert('Registration successful! Please log in.');
+                    window.location.href = '/pages/login';
+                } catch (error) {
+                    // Handle errors (e.g., display error message to user)
+                    alert(error.message);
+                }
+            }
+        });
+
+        function validateEmail(email) {
+            const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            return re.test(email);
+        }
+    });
+</script>
+</body>
+</html>

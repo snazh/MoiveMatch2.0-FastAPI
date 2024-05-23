@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div id="content">
+    <div class="film-list">
+        <section class="articles">
+            {% for movie in trends %}
+            <article>
+                <div class="article-wrapper">
+                    <figure>
+                        {% if movie['backdrop_path'] %}
+                        <img alt="movie-img" src="https://image.tmdb.org/t/p/w500{{ movie['backdrop_path'] }}">
+                        {%else%}
+                        <img alt="movie-img" src="{{ url_for('static', path='pages/static/img/card_bg.png') }}">
+                        {% endif %}
+
+                    </figure>
+                    <div class="article-body">
+                        <h3>{{ movie['title']|truncate(22) }}</h3>
+                        <p>
+                            {{ movie['overview']|truncate(50) }}
+                        </p>
+                        <a href="/pages/movie-overview/{{ movie['id'] }}" class="read-more">
+                            Read more <span class="sr-only"></span>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+    </div>
+
+</div>
+
+{% endblock %}

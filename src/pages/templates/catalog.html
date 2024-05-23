@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+<script>
+    const searchForQuery = () => {
+        const searchInputValue = document.getElementById("query").value;
+        if (searchInputValue) {
+            window.location.href = `/pages/catalog/${encodeURIComponent(searchInputValue)}`;
+        }
+    }
+</script>
+{%endblock%}
+{% block content %}
+<div id="content">
+    <div class="search-field">
+        <form method="get" onsubmit="searchForQuery(); return false;">
+            <input type="text" id="query" placeholder="Search the movie..."
+                   value="{{ request.query_params.get('query', '') }}">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    {%if not search_results%}
+    <div class="no-results">
+        <h2>No Movies Found</h2>
+        <p>Try searching with different keywords.</p>
+    </div>
+    {%else%}
+    <div class="film-list">
+        <section class="articles">
+            {% for movie in search_results %}
+            <article>
+
+                <div class="article-wrapper">
+                    <figure>
+                        {% if movie['backdrop_path'] %}
+                        <img alt="movie-img" src="https://image.tmdb.org/t/p/w500{{ movie['backdrop_path'] }}">
+                        {%else%}
+                        <img alt="movie-img" src="{{ url_for('static', path='pages/static/img/card_bg.png') }}">
+                        {% endif %}
+
+                    </figure>
+                    <div class="article-body">
+                        <h3>{{ movie['title']|truncate(12) }}</h3>
+                        <p>
+                            {{ movie['overview']|truncate(50) }}
+                        </p>
+                        <a href="/pages/movie-overview/{{ movie['id'] }}" class="read-more">
+                            Read more <span class="sr-only"></span>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+    </div>
+    {%endif%}
+</div>
+
+{% endblock %}

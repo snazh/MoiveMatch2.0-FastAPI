@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{page_title}}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='pages/static/css/style.css') }}">
+    {%block head%} {%endblock%}
+</head>
+<body>
+<header>
+    <nav>
+        <div class="nav_left">
+
+            <a href="/pages/trends">TRENDS</a>
+            <a href="/pages/catalog/green">SEARCH</a>
+            <a href="/pages/soulmate">FIND SOULMATE</a>
+            <a href="/pages/about-us">ABOUT</a>
+        </div>
+        <div class="nav_right">
+            <a href="/pages/profile">PROFILE</a>
+            <a href="/pages/register">Sign in</a>
+
+        </div>
+    </nav>
+
+</header>
+<main>
+    {%block content%}   {%endblock%}
+</main>
+<footer>
+    <div id="footer_about">
+        <ul>
+            <li><a href="#">Terms of use</a></li>
+        </ul>
+    </div>
+</footer>
+</body>
+</html>

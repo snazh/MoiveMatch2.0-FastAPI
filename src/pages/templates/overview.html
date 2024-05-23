@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="main-content">
+    <div id="general-info">
+        <h1>{{ movie_overview['title'] }}
+            <button id="favorite-button" class="{{ 'favorite-btn' if button_status else 'default-btn' }}" data-movie-id="{{ movie_overview['id'] }}">
+                &#9829;
+            </button>
+        </h1>
+        <p style="font-style: italic;">~{{ movie_overview['tagline'] }}</p>
+    </div>
+    <br>
+    <div id="detailed-info">
+        <h2>Detailed Information</h2>
+        <h3>{{ movie_overview['title'] }}</h3>
+        <div id="background-text">
+            <p>{{ movie_overview['overview'] }}</p>
+        </div>
+        <div id="details">
+
+            <p><strong>Production Companies:</strong>
+            <ul class="custom-list">
+                {% for company in movie_overview['production_companies'] %}
+                    <li><span class="icon">🎬</span> ㅤ{{ company.name }}</li>
+                {% endfor %}
+            </ul>
+            <strong>Genres:</strong>
+            <ul class="custom-list">
+                {% for genre in movie_overview['genres'] %}
+                    <li><span class="icon">▶</span> {{ genre.name }}</li>
+                {% endfor %}
+            </ul>
+            <p><strong>Rating:</strong> {{ movie_overview['vote_average'] }} </p>
+            <p><strong>Popularity:</strong> {{ movie_overview['popularity'] }} </p>
+            <p><strong>Budget:</strong> {{ movie_overview['budget'] }}$</p>
+            <p><strong>Release Date:</strong> {{ movie_overview['release_date'] }}</p>
+        </div>
+    </div>
+    <section id="comments">
+        <h2>Comments</h2>
+        <div id="user-comment">
+            <h4>User1</h4>
+            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatibus, libero numquam atque deserunt
+                provident amet quod temporibus, veritatis, minima possimus ex omnis quos eius accusamus laborum ab a
+                impedit facilis?</p>
+        </div>
+        <br>
+        <form method="POST">
+            <div id="send-comment" class="comment-form">
+                <textarea name="review" id="review" cols="100" rows="4" style="resize: none;"></textarea>
+                <button id="send_review">Send</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const favoriteButton = document.getElementById('favorite-button');
+        const movieId = favoriteButton.getAttribute('data-movie-id');
+
+        favoriteButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+            if (favoriteButton.classList.contains('default-btn')) {
+                await addToFavorites(movieId);
+            } else {
+                await removeFromFavorites(movieId);
+            }
+        });
+
+        async function addToFavorites(movieId) {
+            try {
+                const response = await fetch(`/movie-algo/add-to-favorite/${movieId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.ok) {
+                    favoriteButton.classList.remove('default-btn');
+                    favoriteButton.classList.add('favorite-btn');
+                } else {
+                    console.error('Failed to add movie to favorites');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function removeFromFavorites(movieId) {
+            try {
+                const response = await fetch(`/movie-algo/remove-from-favorite/${movieId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.ok) {
+                    favoriteButton.classList.remove('favorite-btn');
+                    favoriteButton.classList.add('default-btn');
+                } else {
+                    console.error('Failed to remove movie from favorites');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    });
+</script>
+{% endblock %}

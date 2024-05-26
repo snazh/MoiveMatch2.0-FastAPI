@@ -19,7 +19,14 @@
     <div id="soulmate-info">
         <h2>Soulmate Found!</h2>
         <br>
-        <h3><strong>Username:</strong><a href="another-profile/{{soulmate[0]}}">{{ soulmate[1] }}</a></h3>
+        <h3><strong>Username:</strong>
+            {%if soulmate == 'Not Found' %}
+            <a>Not Found</a>
+            {%else%}
+            <a href="profile/{{soulmate[0]}}">{{ soulmate[1] }}</a>
+            {%endif%}
+        </h3>
+
         <h3>
             <strong>Match Percentage:</strong> <strong
                 class="{% if percentage < 30 %} red {% elif percentage < 70 %} yellow {% else %} green {% endif %}">{{

@@ -16,7 +16,7 @@ from src.friend_system.router import router as friend_system_router
 from src.movie_algo.router import router as movie_algo_router
 from src.pages.router import router as router_pages
 from fastapi.responses import RedirectResponse, JSONResponse
-from src.auth.router import router as user_router
+from src.user_managment.router import router as user_router
 from src.config import REDIS_HOST
 
 app = FastAPI(

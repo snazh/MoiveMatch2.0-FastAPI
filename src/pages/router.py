@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Form, Request, Depends
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi_users import exceptions
+
 
 from src.movie_api.router import search_movies, get_specific_movie, get_popular_movies
 from src.movie_algo.router import is_favorite, get_recommendations
-from src.auth.router import get_profile
-from src.auth.router import get_another_profile
+from src.user_managment.router import get_user_profile, get_my_profile
+
+
 router = APIRouter(
     prefix="/pages",
     tags=["Pages"]
@@ -27,7 +28,6 @@ async def get_trends(request: Request, popular_movies: dict = Depends(get_popula
 
 @router.get("/catalog/{query}", response_class=HTMLResponse)
 async def get_catalog_page(request: Request, movies: dict = Depends(search_movies)):
-    print(True)
     search_results = movies["data"]["results"]
     return templates.TemplateResponse("catalog.html",
                                       {"request": request,
@@ -37,12 +37,11 @@ async def get_catalog_page(request: Request, movies: dict = Depends(search_movie
 
 
 @router.get("/soulmate", response_class=HTMLResponse)
-async def get_soulmate(request: Request, soulmate=Depends(get_recommendations)):
+async def get_soulmate(request: Request, soulmate: dict = Depends(get_recommendations)):
     recommendations = soulmate["data"]
-
     return templates.TemplateResponse("soulmate.html",
                                       {"request": request,
-                                       "title": "Soulmate",
+                                       "page_title": "Soulmate",
                                        "movies": recommendations['movies'],
                                        "soulmate": recommendations["soulmate"],
                                        "percentage": recommendations["percentage"]
@@ -50,10 +49,12 @@ async def get_soulmate(request: Request, soulmate=Depends(get_recommendations)):
 
 
 @router.get("/movie-overview/{movie_id}", response_class=HTMLResponse)
-async def get_movie_overview(request: Request, movie_overview=Depends(get_specific_movie), button=Depends(is_favorite)):
+async def get_movie_overview(request: Request,
+                             movie_overview: dict = Depends(get_specific_movie),
+                             button: dict = Depends(is_favorite)):
     return templates.TemplateResponse("overview.html", {"request": request,
                                                         "movie_overview": movie_overview['data'],
-                                                        "button_status": button["data"],
+                                                        "button_status": button["button_status"],
                                                         "title": movie_overview['data']['title']})
 
 
@@ -76,17 +77,37 @@ async def login_form(request: Request):
                                                      "page_title": "Login"})
 
 
-@router.get('/profile', response_class=HTMLResponse)
-async def own_profile(request: Request, user=Depends(get_profile)):
-    data = user['data']
+@router.get('/profile/{user_id}', response_class=HTMLResponse)
+async def get_user_profile(request: Request, user_profile=Depends(get_user_profile)):
+    movies = user_profile["data"]['movies']
+    user_data = user_profile["data"]['user']
     return templates.TemplateResponse('user_profile.html', {"request": request,
-                                                            "user": data,
+                                                            "movies": movies,
+                                                            "user": {
+                                                                "id": user_data[0],
+                                                                "email": user_data[1],
+                                                                "username": user_data[2],
+                                                                "created_at": user_data[3]
+
+                                                            },
+                                                            "is_owner": False,
                                                             "page_title": "Profile"})
 
 
-@router.get("/another-profile/{user_id}", response_class=HTMLResponse)
-async def profile(request: Request, user=Depends(get_another_profile)):
-    data = user['data']
+@router.get("/my-profile", response_class=HTMLResponse)
+async def get_my_profile(request: Request, user_profile=Depends(get_my_profile)):
+    movies = user_profile["data"]['movies']
+    user_data = user_profile["data"]['user']
     return templates.TemplateResponse('user_profile.html', {"request": request,
-                                                            "user": data,
-                                                            "page_title": data['username']})
+                                                            "movies": movies,
+                                                            "user": {
+                                                                "id": user_data[0],
+                                                                "email": user_data[1],
+                                                                "username": user_data[2],
+                                                                "created_at": user_data[3]
+                                                            },
+                                                            "is_owner": True,
+                                                            "page_title": "Profile"})
+
+
+

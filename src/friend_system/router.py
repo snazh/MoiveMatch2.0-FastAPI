@@ -1,11 +1,10 @@
 from fastapi import APIRouter, status, Depends, HTTPException
-from sqlalchemy import insert, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
-
+from src.friend_system.service import FriendService
 from src.auth.base_config import get_current_user_or_redirect
 from src.database import get_async_session
-from src.friend_system.models import friendship
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(
     prefix="/friends",
@@ -13,69 +12,83 @@ router = APIRouter(
 )
 
 
-@router.post("/add-friend", status_code=status.HTTP_201_CREATED)
+@router.post("/add-friend/{friend_id}", status_code=status.HTTP_201_CREATED)
 async def add_friend(friend_id: int, session: AsyncSession = Depends(get_async_session),
                      curr_user=Depends(get_current_user_or_redirect)):
     try:
-        if isinstance(curr_user, RedirectResponse):
-            return curr_user
-        stmt = insert(friendship).values(user_id=curr_user.id, friend_id=friend_id)
-        await session.execute(stmt)
-        await session.commit()
+        if isinstance(curr_user, RedirectResponse):  # checking for current user
+            return curr_user  # redirects to the /pages/login/page (frontend)
+
+        if curr_user.id == friend_id:  # preventing adding yourself to the friend list
+            raise HTTPException(status_code=500)
+        await FriendService(curr_user.id).add_friend(friend_id, session)
+
         return {
             "status": "success",
             "data": None,
             "details": "The friend has been successfully added"}
-    except Exception as e:
-
+    except IntegrityError as e:
+        await session.rollback()  # Preventing adding non-existent user
+        # Check for ForeignKeyViolationError
+        if 'ForeignKeyViolationError' in str(e.orig):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={
+                "status": "error",
+                "data": None,
+                "details": "The friend with the given ID does not exist."
+            })
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail={
+                "status": "error",
+                "data": None,
+                "details": f"Database error: {e.orig}"
+            })
+    except Exception:
+        await session.rollback()
         raise HTTPException(status_code=500, detail={
             "status": "error",
             "data": None,
-            "details": f"An error occurred while adding the friend{e}"
+            "details": f"An error occurred while adding the friend"
         })
 
 
-@router.delete("/delete-friend/{friend_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete-friend/{friend_id}", status_code=status.HTTP_200_OK)
 async def delete_friend(friend_id: int, session: AsyncSession = Depends(get_async_session),
                         curr_user=Depends(get_current_user_or_redirect)):
     try:
         if isinstance(curr_user, RedirectResponse):
             return curr_user
-        stmt = delete(friendship).where(friendship.c.user_id == curr_user.id, friendship.c.friend_id == friend_id)
-        await session.execute(stmt)
-        await session.commit()
-        return {
-            "status": "success",
-            "data": None,
-            "details": "The friend has been successfully deleted"
-        }
-    except Exception as e:
+        is_friend = await FriendService(curr_user.id).is_friend(friend_id, session)
+        if is_friend:
+
+            await FriendService(curr_user.id).delete_friend(friend_id, session)
+            return {
+                "status": "success",
+                "data": None,
+                "details": "The friend has been successfully deleted"
+            }
+        else:
+            raise HTTPException(status_code=500)
+
+    except Exception:
         raise HTTPException(status_code=500, detail={
             "status": "error",
             "data": None,
-            "details": f"An error occurred while deleting the friend: {str(e)}"
+            "details": f"An error occurred while deleting the friend"
         })
 
 
 @router.get("/get-friends-list/{user_id}", status_code=status.HTTP_200_OK)
-async def get_friends_list(user_id: int, session: AsyncSession = Depends(get_async_session)):
+async def get_user_friends(user_id: int, session: AsyncSession = Depends(get_async_session)):
     try:
-        fetch_ids = select(friendship).where(friendship.c.user_id == user_id)
-        result1 = await session.execute(fetch_ids)
-
-        friends = [{"id": row[1]} for row in result1.all()]
-
+        friends = await FriendService(user_id).get_friends_list(session)
         return {
             "status": "success",
             "data": friends,
             "details": f"Friends of {user_id} were fetched successfully"
         }
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail={
             "status": "error",
             "data": None,
-            "details": f"An error occurred while finding friends {e}"
+            "details": f"An error occurred while fetching {user_id}'s friends"
         })
-
-
-

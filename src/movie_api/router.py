@@ -2,15 +2,10 @@ from fastapi import APIRouter, status, HTTPException
 from src.movie_api.service import TMDB
 from fastapi_cache.decorator import cache
 
-from src.config import TMDB_API
-
 router = APIRouter(
     prefix="/movie_api",
     tags=["Movie API"]
 )
-
-
-# TMDB = APIFunctions(TMDB_API)
 
 
 @router.get("/trends", status_code=status.HTTP_200_OK)
@@ -69,4 +64,27 @@ async def search_movies(query: str):
             "status": "error",
             "data": None,
             "details": f"Error occurred while searching movies"
+        })
+
+
+@router.get("/brief-data/{movie_id}", status_code=status.HTTP_200_OK)
+async def get_movie_brief_data(movie_id: int):
+    try:
+        movie_details = await TMDB.get_movie_brief_data(movie_id)
+        if movie_details["title"] is None:
+            raise HTTPException(status_code=500, detail={
+                "status": "error",
+                "data": None,
+                "details": f"Movie does not exist"
+            })
+        return {
+            "status": "success",
+            "data": movie_details,
+            "details": "The movies were found successfully"
+        }
+    except Exception:
+        raise HTTPException(status_code=500, detail={
+            "status": "error",
+            "data": None,
+            "details": f"Movie with id:{movie_id} does not exist"
         })

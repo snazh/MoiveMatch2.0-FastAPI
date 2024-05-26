@@ -3,30 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{page_title}}</title>
+    <title>{{ page_title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='pages/static/css/style.css') }}">
-    {%block head%} {%endblock%}
+    {% block head %}{% endblock %}
 </head>
 <body>
 <header>
     <nav>
         <div class="nav_left">
-
             <a href="/pages/trends">TRENDS</a>
             <a href="/pages/catalog/green">SEARCH</a>
             <a href="/pages/soulmate">FIND SOULMATE</a>
             <a href="/pages/about-us">ABOUT</a>
         </div>
-        <div class="nav_right">
-            <a href="/pages/profile">PROFILE</a>
-            <a href="/pages/register">Sign in</a>
-
+        <div class="nav_right" id="nav_right">
+            <!-- Links will be dynamically updated by JavaScript -->
         </div>
     </nav>
-
 </header>
 <main>
-    {%block content%}   {%endblock%}
+    {% block content %}{% endblock %}
 </main>
 <footer>
     <div id="footer_about">
@@ -35,5 +31,41 @@
         </ul>
     </div>
 </footer>
+
+<script>
+// Function to fetch current user status
+async function fetchCurrentUser() {
+    try {
+        const response = await fetch('/users-management/get-current-user'); // Adjust the endpoint as necessary
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+    }
+}
+
+// Function to update the navigation bar
+async function updateNavBar() {
+    const navRight = document.getElementById('nav_right');
+    const user = await fetchCurrentUser();
+
+    if (user && user.isAuthenticated) {
+        navRight.innerHTML = `
+            <a href="/pages/my-profile">PROFILE</a>
+            <a href="/auth/jwt/logout">LOGOUT</a>
+        `;
+    } else {
+        navRight.innerHTML = `
+            <a href="/pages/register">Sign in</a>
+        `;
+    }
+}
+
+// Call the function to update the navigation bar on page load
+document.addEventListener('DOMContentLoaded', updateNavBar);
+</script>
+
 </body>
 </html>

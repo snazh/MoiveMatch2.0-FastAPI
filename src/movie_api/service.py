@@ -26,7 +26,9 @@ class APIFunctions:
     async def get_movie_details(self, movie_id: int) -> dict:
         async with httpx.AsyncClient() as client:
             response = await client.get(f"{BASE_URL}movie/{movie_id}?api_key={self.api_key}&language=en-US")
-            return response.json()
+            data = response.json()
+
+            return data
 
     async def get_movie_brief_data(self, movie_id: int) -> dict[str, Any] | None:
         async with httpx.AsyncClient() as client:
@@ -36,7 +38,6 @@ class APIFunctions:
             data = response.json()
 
             return {
-
                 "title": data.get("title"),
                 "overview": data.get("overview"),
                 "vote_average": data.get("vote_average"),

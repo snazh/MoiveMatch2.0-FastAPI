@@ -1,8 +1,50 @@
-from sqlalchemy import select, distinct
-from typing import Set
+from sqlalchemy import select, distinct, insert, delete
+from typing import Set, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.movie_algo.models import user_movie, movie
 from src.auth.models import user
+
+
+class MovieAlgoService:
+    def __init__(self, user_id: int):
+        self.user_id = user_id
+
+    async def add_movie(self, movie_id: int, movie_data: dict, session: AsyncSession) -> None:
+        existing_movie = await session.execute(select(movie).where(movie.c.movie_id == movie_id))
+        existing_movie = existing_movie.scalar_one_or_none()
+
+        if existing_movie is None:
+            details = movie_data
+            add_movie_stmt = insert(movie).values(movie_id=movie_id, details=details)
+            await session.execute(add_movie_stmt)
+            await session.commit()
+
+        # Add the movie to the user's favorites
+        add_to_favorite_stmt = insert(user_movie).values(user_id=self.user_id, movie_id=movie_id)
+        await session.execute(add_to_favorite_stmt)
+        await session.commit()
+
+    async def delete_movie(self, movie_id: int, session: AsyncSession) -> None:
+        stmt = delete(user_movie).where(user_movie.c.user_id == self.user_id, user_movie.c.movie_id == movie_id)
+        await session.execute(stmt)
+        await session.commit()
+
+    async def is_favorite(self, movie_id: int, session: AsyncSession) -> bool:
+        fetch_movie_query = select(user_movie).where(user_movie.c.user_id == self.user_id,
+                                                     user_movie.c.movie_id == movie_id)
+        result = await session.execute(fetch_movie_query)
+        friend = result.scalar()
+        return friend is not None
+
+    async def get_movie_list(self, session: AsyncSession) -> List:
+        stmt = (select(movie).
+                join(user_movie, movie.c.movie_id == user_movie.c.movie_id).
+                where(user_movie.c.user_id == self.user_id))
+
+        result = await session.execute(stmt)
+        movies = [row[1] for row in result.fetchall()]
+        return movies
+
 
 class GetUserMovie:
     def __init__(self, user_id: int):

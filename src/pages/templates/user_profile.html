@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', path='pages/static/css/profile.css') }}">
-{% endblock %}
+
+
+
+{%endblock%}
+
 
 {% block content %}
 <div class="container">
@@ -16,7 +20,7 @@
         <div class="section">
             <p><strong>My movies</strong></p>
             <ul class="movies-list">
-                {%for movie in user['movies']%}
+                {%for movie in movies%}
                 <li><a href = "movie-overview/{{movie['id']}}">{{movie['title']|truncate(25)}}</a></li>
                 {%endfor%}
             </ul>

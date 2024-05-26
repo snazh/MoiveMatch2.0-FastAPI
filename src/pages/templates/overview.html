@@ -4,6 +4,7 @@
 <div id="main-content">
     <div id="general-info">
         <h1>{{ movie_overview['title'] }}
+
             <button id="favorite-button" class="{{ 'favorite-btn' if button_status else 'default-btn' }}" data-movie-id="{{ movie_overview['id'] }}">
                 &#9829;
             </button>

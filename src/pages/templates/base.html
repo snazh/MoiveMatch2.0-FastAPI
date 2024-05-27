@@ -11,10 +11,11 @@
 <header>
     <nav>
         <div class="nav_left">
+            <a href="/pages/about-us">ABOUT</a>
             <a href="/pages/trends">TRENDS</a>
             <a href="/pages/catalog/green">SEARCH</a>
             <a href="/pages/soulmate">FIND SOULMATE</a>
-            <a href="/pages/about-us">ABOUT</a>
+            <a href="/pages/search-friends/s">FRIENDS</a>
         </div>
         <div class="nav_right" id="nav_right">
             <!-- Links will be dynamically updated by JavaScript -->
@@ -54,7 +55,7 @@ async function updateNavBar() {
     if (user && user.isAuthenticated) {
         navRight.innerHTML = `
             <a href="/pages/my-profile">PROFILE</a>
-            <a href="/auth/jwt/logout">LOGOUT</a>
+            <a href="/pages/login">LOGOUT</a>
         `;
     } else {
         navRight.innerHTML = `

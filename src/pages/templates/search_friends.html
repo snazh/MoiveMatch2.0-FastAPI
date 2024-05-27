@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    #friends-list {
+        padding: 2em;
+    }
+
+    #friends-list h2 {
+        text-align: center;
+        margin-bottom: 1em;
+        color: white; /* Neon green color */
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* Three columns */
+        gap: 20px; /* Gap between cards */
+        justify-content: center;
+    }
+
+    .card {
+        background-color: #111;
+        border: 2px solid white;
+        border-radius: 10px;
+        padding: 1em;
+        box-shadow: 0 0 10px white;
+        text-align: center;
+        color: #fff;
+    }
+    .card h3 {
+        color: yellow;
+        margin-bottom: 0.5em;
+    }
+    .card p {
+        margin: 0.5em 0;
+    }
+</style>
+<script>
+    const searchForQuery = () => {
+        const searchInputValue = document.getElementById("query").value;
+        if (searchInputValue) {
+            window.location.href = `/pages/search-friends/${encodeURIComponent(searchInputValue)}`;
+        }
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content">
+    <div class="search-field">
+        <form method="get" onsubmit="searchForQuery(); return false;">
+            <input type="text" id="query" placeholder="Search for friends..."
+                   value="{{ request.query_params.get('query', '') }}">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    {% if not users %}
+    <div class="no-results">
+        <h2>No Friends Found</h2>
+        <p>Try searching with different keywords.</p>
+    </div>
+    {% else %}
+    <section id="friends-list">
+
+        <div class="cards">
+            {% for user in users %}
+            <div class="card">
+                <h3><a href="/pages/profile/{{ user[0] }}">{{ user[2] }}</a></h3>
+                <p><strong>Email:</strong> {{ user[1] }}</p>
+                <!--            <p><strong>Phone:</strong> 123-456-7890</p>-->
+                <!--            <p><strong>Address:</strong> 123 Main St, Anytown, USA</p>-->
+                <!--            <p><strong>Birthday:</strong> January 1, 1990</p>-->
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

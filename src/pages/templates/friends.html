@@ -1,0 +1,63 @@
+{%extends "base.html" %}
+{%block head%}
+<style>
+#friends-list {
+    padding: 2em;
+}
+
+#friends-list h2 {
+    text-align: center;
+    margin-bottom: 1em;
+    color: white; /* Neon green color */
+}
+
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card {
+    background-color: #111;
+    border: 2px solid white;
+    border-radius: 10px;
+    padding: 1em;
+    margin: 1em;
+    width: 30%;
+    box-shadow: 0 0 10px white;
+    text-align: center;
+}
+.card h3 {
+    color: yellow;
+    margin-bottom: 0.5em;
+}
+.card p {
+    color: #fff;
+    margin: 0.5em 0;
+}
+</style>
+
+{%endblock%}
+{%block content%}
+<section id="friends-list">
+    <h2>Friends List</h2>
+    {%if not friends%}
+    <div class="no-results">
+        <h2>Still have no friends???</h2>
+        <a href ="pages/search/friends/s">Let's find them</a>
+    </div>
+    {%else%}
+    <div class="cards">
+        {%for friend in friends%}
+        <div class="card">
+            <h3><a href = "/pages/profile/{{friend['user_id']}}">{{friend['username']}}</a></h3>
+            <p><strong>Email:</strong> {{friend['email']}}</p>
+<!--            <p><strong>Phone:</strong> 123-456-7890</p>-->
+<!--            <p><strong>Address:</strong> 123 Main St, Anytown, USA</p>-->
+<!--            <p><strong>Birthday:</strong> January 1, 1990</p>-->
+        </div>
+        {%endfor%}
+    </div>
+    {%endif%}
+</section>
+{%endblock%}

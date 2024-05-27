@@ -51,6 +51,20 @@ async def add_friend(friend_id: int, session: AsyncSession = Depends(get_async_s
         })
 
 
+@router.get("/is-friend/{user_id}", status_code=status.HTTP_200_OK)
+async def friend_status(user_id: int, session: AsyncSession = Depends(get_async_session),
+                        curr_user=Depends(get_current_user_or_redirect)):
+    try:
+        if isinstance(curr_user, RedirectResponse):
+            return curr_user
+        is_friend = await FriendService(curr_user.id).is_friend(user_id, session)
+        return {
+            "is_friend": is_friend
+        }
+    except Exception:
+        raise HTTPException(status_code=500, detail={"is_friend": None})
+
+
 @router.delete("/delete-friend/{friend_id}", status_code=status.HTTP_200_OK)
 async def delete_friend(friend_id: int, session: AsyncSession = Depends(get_async_session),
                         curr_user=Depends(get_current_user_or_redirect)):
@@ -78,17 +92,24 @@ async def delete_friend(friend_id: int, session: AsyncSession = Depends(get_asyn
 
 
 @router.get("/get-friends-list/{user_id}", status_code=status.HTTP_200_OK)
-async def get_user_friends(user_id: int, session: AsyncSession = Depends(get_async_session)):
+async def get_user_friends(session: AsyncSession = Depends(get_async_session),
+                           curr_user=Depends(get_current_user_or_redirect)):
     try:
-        friends = await FriendService(user_id).get_friends_list(session)
+        if isinstance(curr_user, RedirectResponse):
+            return curr_user
+        friends = await FriendService(curr_user.id).get_friends_list(session)
+
         return {
             "status": "success",
-            "data": friends,
-            "details": f"Friends of {user_id} were fetched successfully"
+            "data": {
+                "friends": friends,
+                "count": len(friends)
+            },
+            "details": f"Friends of {curr_user.id} were fetched successfully"
         }
     except Exception:
         raise HTTPException(status_code=500, detail={
             "status": "error",
             "data": None,
-            "details": f"An error occurred while fetching {user_id}'s friends"
+            "details": f"An error occurred while fetching {curr_user.id}'s friends"
         })

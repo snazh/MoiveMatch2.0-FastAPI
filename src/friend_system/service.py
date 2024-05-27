@@ -2,6 +2,7 @@ from typing import List, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, delete
 from src.friend_system.models import friendship
+from src.auth.models import user
 
 
 class FriendService:
@@ -18,10 +19,32 @@ class FriendService:
         await session.execute(stmt)
         await session.commit()
 
-    async def get_friends_list(self, session: AsyncSession) -> List[Dict]:
-        fetch_ids_query = select(friendship).where(friendship.c.user_id == self.user_id)
-        result = await session.execute(fetch_ids_query)
-        friends = [{"id": row[1]} for row in result.fetchall()]
+    # async def get_friends_list(self, session: AsyncSession) -> List[Dict]:
+    #     fetch_ids_query = select(friendship).where(friendship.c.user_id == self.user_id)
+    #     result = await session.execute(fetch_ids_query)
+    #     friends = [{"id": row[1]} for row in result.fetchall()]
+    #     return friends
+    async def get_friends_list(self, session: AsyncSession):
+
+        fetch_friends_query = (
+            select(user.c.id, user.c.username, user.c.email)
+            .join(friendship, friendship.c.friend_id == user.c.id)
+            .where(friendship.c.user_id == self.user_id)
+        )
+
+        # Execute the query
+        result = await session.execute(fetch_friends_query)
+
+        # Extract friend data from the result
+        friends = [
+            {
+                "user_id": row.user_id,
+                "username": row.username,
+                "email": row.email
+            }
+            for row in result.fetchall()
+        ]
+
         return friends
 
     async def is_friend(self, friend_id: int, session: AsyncSession) -> bool:

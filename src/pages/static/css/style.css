@@ -1,3 +1,5 @@
+
+
 a {
   color: white; /* Change to your desired color */
   text-decoration: none; /* Optional: removes underline */
@@ -495,14 +497,14 @@ main {
 }
 
 .heading {
-    width: 70%; 
+    width: 70%;
     margin-left: 70px;
-    margin-top: 20px; 
+    margin-top: 20px;
     font-size: 19px;
 }
 
 #content h3 {
-    border-bottom: 1px solid white; 
+    border-bottom: 1px solid white;
 }
 
 .info {

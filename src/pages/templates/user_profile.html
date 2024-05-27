@@ -1,30 +1,204 @@
 {% extends "base.html" %}
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', path='pages/static/css/profile.css') }}">
+<!--<link rel="stylesheet" href="{{ url_for('static', path='pages/static/css/profile.css') }}">-->
+<style>
 
+    .friends-count {
+        background-color: black;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        display: inline-block;
+        margin-top: 10px;
+    }
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #121212;
+    }
+    .profile-container {
+        background-color: #1e1e1e;
+        border-radius: 20px;
+        padding: 80px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: space-between;
+        width: 800px;
+        text-align: center;
+    }
+    .section {
+        margin-bottom: 20px;
+        flex: 1;
+        height: 360px;
+        overflow-y: auto;
+    }
+    .avatar {
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        margin-bottom: 20px;
+    }
+    .username {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+        color: #fff;
+    }
+    .email {
+        font-size: 1em;
+        color: #ccc;
+        margin-bottom: 20px;
+    }
+    .movies-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    .movies-list li {
+        background-color: #444;
+        margin: 5px 0;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .add-movie {
+        background-color: #6200ea;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s; /* Added transition for smoother hover effect */
+    }
+    .add-movie:hover {
+        background-color: #4b0082; /* Darker color on hover */
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const favoriteButton = document.getElementById('favorite-button');
+    const friend_id = {{user['id']}};
 
+    favoriteButton.addEventListener('click', async (event) => {
+        event.preventDefault();
+        if (favoriteButton.classList.contains('default-btn')) {
+            await addToFavorites(friend_id);
+        } else {
+            await removeFromFavorites(friend_id);
+        }
+    });
 
-{%endblock%}
+    async function addToFavorites(friend_id) {
+        try {
+            const response = await fetch(`/friends/add-friend/${friend_id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                favoriteButton.classList.remove('default-btn');
+                favoriteButton.classList.add('favorite-btn');
+            } else {
+                console.error('Failed to add friend');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
+    async function removeFromFavorites(friend_id) {
+        try {
+            const response = await fetch(`/friends/delete-friend/${friend_id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (response.ok) {
+                favoriteButton.classList.remove('favorite-btn');
+                favoriteButton.classList.add('default-btn');
+            } else {
+                console.error('Failed to delete friend');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+});
+async function fetchFriendsCount(userId) {
+    try {
+        const response = await fetch(`/friends/get-friends-list/${userId}`); // Corrected endpoint format
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        return data.data.count;
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+    }
+}
+
+async function updateFriendsCount() {
+    const currentUser = await fetchCurrentUser();
+    if (currentUser && currentUser.isAuthenticated && currentUser.id) {
+        const friendsCount = await fetchFriendsCount(currentUser.id);
+        if (friendsCount !== undefined) {
+            document.querySelector('.friends-count span').textContent = friendsCount;
+        }
+    } else {
+        console.error('User is not authenticated or user ID is missing');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', updateFriendsCount);
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="profile-container">
-
         <div class="section">
             <br><br>
             <img src="{{ url_for('static', path='pages/static/img/avatar.png') }}" alt="User Avatar" class="avatar">
-            <div class="username">{{user['username']}}</div>
-            <div class="email">{{user['email']}}</div>
+            <div class="username">{{ user['username'] }}</div>
+            <div class="email">Email: {{ user['email'] }}</div>
+
+            <a href="/pages/my-friends">
+                <div class="friends-count">Friends: <span>Loading...</span></div>
+            </a>
+            {%if is_owner%}
+            <p><a href="/pages/search-friends/s">Find more friends</a></p>
+            {%else%}
+            <button id="favorite-button" class="{{ 'favorite-btn' if is_friend else 'default-btn' }}">
+                &#9733;
+
+            </button>
+            {%endif%}
         </div>
         <div class="section">
-            <p><strong>My movies</strong></p>
+            <p><strong>
+                {%if is_owner%}
+                My movies
+                {%else%}
+                Movies
+                {%endif%}
+            </strong></p>
+            {%if not movies%}
+            <div class="no-results">
+                <h2>No Movies Yet</h2>
+            </div>
+            {%else%}
             <ul class="movies-list">
-                {%for movie in movies%}
-                <li><a href = "movie-overview/{{movie['id']}}">{{movie['title']|truncate(25)}}</a></li>
-                {%endfor%}
+                {% for movie in movies %}
+                <li><a href="movie-overview/{{ movie['id'] }}">{{ movie['title']|truncate(25) }}</a></li>
+                {% endfor %}
             </ul>
+            {%endif%}
+            {%if is_owner%}
             <a href="/pages/catalog/Grinch" class="add-movie">Search Movie</a>
+            {%endif%}
         </div>
     </div>
 </div>

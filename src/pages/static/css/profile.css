@@ -1,3 +1,11 @@
+.friends-count {
+    background-color: black;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-top: 10px;
+}
 .container {
     display: flex;
     justify-content: center;
@@ -7,19 +15,19 @@
 }
 .profile-container {
     background-color: #1e1e1e;
-    border-radius: 20px; /* Border radius applied to external container */
+    border-radius: 20px;
     padding: 80px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Added box shadow for depth */
-    display: flex; /* Added */
-    justify-content: space-between; /* Added */
-    width: 800px; /* Adjusted */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: space-between;
+    width: 800px;
     text-align: center;
 }
 .section {
     margin-bottom: 20px;
-    flex: 1; /* Added */
-    height: 300px; /* Increased height */
-    overflow-y: auto; /* Added to enable scrolling */
+    flex: 1;
+    height: 400px;
+    overflow-y: auto;
 }
 .avatar {
 

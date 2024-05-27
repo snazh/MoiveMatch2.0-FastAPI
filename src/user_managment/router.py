@@ -1,6 +1,9 @@
 from fastapi import APIRouter, status, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
+
+from src.auth.models import user
 from src.user_managment.service import UserService
 from src.movie_algo.service import GetUserMovie
 from src.auth.base_config import get_current_user_or_redirect
@@ -14,8 +17,10 @@ router = APIRouter(
 
 @router.get("/get-current-user", status_code=status.HTTP_200_OK)
 async def get_current_user(curr_user=Depends(get_current_user_or_redirect)):
-
-    return {"isAuthenticated": True}
+    return {
+        "isAuthenticated": True,
+        "id": curr_user.id
+    }
 
 
 @router.get("/profile/{user_id}", status_code=status.HTTP_200_OK)
@@ -62,4 +67,21 @@ async def get_my_profile(session: AsyncSession = Depends(get_async_session),
             "status": "error",
             "data": None,
             "details": f"Error occurred while fetching your profile"
+        })
+
+
+@router.post("/search-user/{query}")
+async def search_users(query: str, session: AsyncSession = Depends(get_async_session)):
+    try:
+        users = await UserService.search_users_by_query(query, session)
+        return {
+            "status": "success",
+            "data": users,
+            "details": "Users have been fetched"
+        }
+    except Exception:
+        raise HTTPException(status_code=500, detail={
+            "status": "error",
+            "data": None,
+            "details": f"Error occurred while searching user"
         })

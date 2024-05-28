@@ -77,12 +77,3 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
     )
 
 
-@app.get("/protected-route")
-async def protected_route(user=Depends(get_current_user_or_redirect)):
-    if isinstance(user, RedirectResponse):
-        return user
-    return {"message": f"Hello, {user.email}"}
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)

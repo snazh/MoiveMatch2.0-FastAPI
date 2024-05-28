@@ -10,11 +10,6 @@ from src.auth.models import metadata as metadata_auth
 from src.movie_algo.models import metadata as metadata_movie_algo
 from src.friend_system.models import metadata as metadata_friend_system
 
-import os
-import sys
-
-sys.path.append(os.path.join(sys.path[0], 'src'))
-
 config = context.config
 section = config.config_ini_section
 config.set_section_option(section, "DB_HOST", DB_HOST)
@@ -25,7 +20,7 @@ config.set_section_option(section, "DB_PASS", DB_PASS)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = [metadata_auth,metadata_movie_algo, metadata_friend_system]
+target_metadata = [metadata_auth, metadata_movie_algo, metadata_friend_system]
 
 
 def run_migrations_offline() -> None:
